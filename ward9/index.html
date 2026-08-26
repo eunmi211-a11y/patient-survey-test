@@ -459,7 +459,7 @@
   // 웹 앱 배포 URL로 교체하세요. (설정 방법은 전달받은 안내 참고)
   // =====================================================================
   var CONFIG = {
-    GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx4bOfDf20TUNvOcsoPSaSaystzFcga5kwq5VChSoaXnB-4PO64SeqBwzRXMiJL9rgGSw/exec",
+    GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/AKfycbx1uz4C4Lj22M_4mkIy-yxqVuit59O1EZAPKHNUmWxJe-l96kN2HazlanwiAcTgME0V8A/exec",
     HOSPITAL_NAME: "센트럴병원",
     WARD_NAME: "9병동"
   };
@@ -650,11 +650,22 @@
     else { goPage(1); }
   });
 
+  // new Date().toISOString()는 항상 UTC(협정세계시)로 나와서 구글시트에 찍히는
+  // 시각이 실제 한국 시각보다 9시간 느리게 보이는 문제가 있었다. 응답자의 휴대폰은
+  // 한국 시각으로 맞춰져 있다고 보고, 기기의 로컬 시각 값을 그대로 "YYYY-MM-DD HH:MM:SS"
+  // 문자열로 만들어 보낸다.
+  function pad2(n){ return (n < 10 ? '0' : '') + n; }
+  function localTimestamp(){
+    var d = new Date();
+    return d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate()) + ' ' +
+           pad2(d.getHours()) + ':' + pad2(d.getMinutes()) + ':' + pad2(d.getSeconds());
+  }
+
   function buildPayload(){
     var payload = {
       hospital: CONFIG.HOSPITAL_NAME,
       ward: CONFIG.WARD_NAME,
-      submittedAt: new Date().toISOString(),
+      submittedAt: localTimestamp(),
       surveyId: "5th-HIRA-experience-26q"
     };
     QUESTIONS.forEach(function(q){
